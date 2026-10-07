@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Testes - RPG</title>
+
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .resumo-testes {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+
+        .lista-testes {
+            list-style: none;
+        }
+
+        .lista-testes li {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        .passou {
+            color: var(--sucesso);
+        }
+
+        .falhou {
+            color: var(--perigo);
+            font-weight: bold;
+        }
+
+        .dica-console {
+            text-align: center;
+            color: var(--texto-suave);
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+    </style>
+
+    <script src="js/util.js" defer></script>
+    <script src="js/dados.js" defer></script>
+    <script src="js/modelo/efeitos.js" defer></script>
+    <script src="js/modelo/combatente.js" defer></script>
+    <script src="js/modelo/herois.js" defer></script>
+    <script src="js/modelo/monstros.js" defer></script>
+    <script src="js/batalha/dano.js" defer></script>
+    <script src="js/batalha/acoes.js" defer></script>
+    <script src="js/batalha/narrador.js" defer></script>
+    <script src="js/batalha/batalha.js" defer></script>
+    <script src="js/telas/menu.js" defer></script>
+    <script src="js/testes.js" defer></script>
+</head>
+
+<body>
+    <menu-rpg></menu-rpg>
+
+    <main class="container">
+        <h1>Testes do Jogo</h1>
+        <section class="section">
+            <div id="resultado-testes">Rodando os testes...</div>
+            <p class="dica-console">Aperte F12 e abra o "Console" para ver uma batalha inteira narrada pela SaidaNoConsole.</p>
+        </section>
+    </main>
+</body>
+
+</html>

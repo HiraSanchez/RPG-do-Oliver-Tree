@@ -1,0 +1,270 @@
+/* =====================================================================
+   BASE — tema, tipografia, botões e formulários (usado pelas 3 páginas)
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=MedievalSharp&display=swap');
+
+:root {
+    --borda: #8b5e3c;
+    --borda-clara: #a9744f;
+    --destaque: #e0b973;
+    --destaque-claro: #ffd98d;
+    --fundo-painel: rgba(30, 24, 20, 0.92);
+    --fundo-secao: rgba(46, 34, 18, 0.7);
+    --fundo-caixa: rgba(46, 34, 18, 0.6);
+    --fundo-campo: rgba(58, 46, 32, 0.9);
+    --texto: #f0e6d2;
+    --texto-suave: #c9b99a;
+    --sucesso: #4caf50;
+    --perigo: #f44336;
+    --alerta: #ff9800;
+    --magia: #64b5f6;
+    --veneno: #9ccc65;
+    --ouro: #ffd700;
+
+    --fonte-titulo: 'MedievalSharp', cursive;
+    --fonte-botao: 'Cinzel', serif;
+    --fonte-texto: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Garante que [hidden] vença regras como display: grid */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    font-family: var(--fonte-texto);
+    color: var(--texto);
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 16px 16px 48px;
+    /* Fundo feito só com CSS: brilho de tocha no topo e cantos escuros.
+       Não depende de imagem externa nem de internet. */
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(224, 185, 115, 0.18), transparent 60%),
+        radial-gradient(ellipse at 0% 100%, rgba(139, 94, 60, 0.25), transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(139, 94, 60, 0.25), transparent 50%),
+        linear-gradient(#24190f, #120c08) fixed,
+        #1a140f;
+}
+
+/* ---------- Navegação ---------- */
+
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+}
+
+.menu a {
+    font-family: var(--fonte-botao);
+    color: var(--texto);
+    text-decoration: none;
+    padding: 8px 18px;
+    border: 1px solid var(--borda);
+    border-radius: 999px;
+    background: var(--fundo-painel);
+    transition: background 0.2s, color 0.2s;
+}
+
+.menu a:hover {
+    background: var(--borda);
+}
+
+.menu a[aria-current="page"] {
+    background: var(--borda);
+    color: var(--destaque-claro);
+}
+
+/* ---------- Estrutura ---------- */
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: var(--fundo-painel);
+    border: 2px solid var(--borda);
+    border-radius: 15px;
+    padding: 24px 28px;
+    box-shadow: 0 0 20px #000;
+}
+
+.section {
+    margin-bottom: 28px;
+    padding: 20px;
+    border-radius: 12px;
+    background: linear-gradient(to bottom, var(--fundo-secao), rgba(30, 24, 20, 0.9));
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+h1,
+h2 {
+    text-align: center;
+    color: var(--destaque);
+    text-shadow: 2px 2px 4px #000;
+    font-family: var(--fonte-titulo);
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+h3 {
+    font-family: var(--fonte-titulo);
+    color: var(--destaque-claro);
+    margin-bottom: 12px;
+}
+
+h4 {
+    color: var(--destaque);
+    font-family: var(--fonte-titulo);
+    margin: 16px 0 8px;
+}
+
+/* ---------- Formulários ---------- */
+
+label {
+    display: block;
+    margin-top: 14px;
+    font-weight: bold;
+    color: var(--destaque-claro);
+    font-family: var(--fonte-titulo);
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-top: 6px;
+    background-color: var(--fundo-campo);
+    color: #f8f2dd;
+    border: 2px solid var(--borda);
+    border-radius: 10px;
+    font-family: var(--fonte-titulo);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--destaque);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(224, 185, 115, 0.3);
+}
+
+.mensagem-erro {
+    color: var(--perigo);
+    font-weight: bold;
+    text-align: center;
+    min-height: 1.5em;
+    margin-top: 8px;
+}
+
+/* ---------- Botões ---------- */
+
+button {
+    background-color: var(--borda);
+    color: var(--texto);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-family: var(--fonte-botao);
+    box-shadow: 2px 2px 6px #000;
+    transition: transform 0.15s, background-color 0.2s, box-shadow 0.2s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background-color: var(--borda-clara);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 3px solid var(--destaque-claro);
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.botao-secundario {
+    background: transparent;
+    border: 1px solid var(--borda);
+    box-shadow: none;
+    font-size: 0.95rem;
+}
+
+.botao-secundario:hover:not(:disabled) {
+    background: rgba(139, 94, 60, 0.35);
+}
+
+/* Ação principal de um grupo (ex.: "Recomendado para a classe") */
+.botao-destaque {
+    background: linear-gradient(135deg, #c9973f, var(--borda));
+    color: #fff8e6;
+    font-size: 0.95rem;
+}
+
+.botao-destaque:hover:not(:disabled) {
+    background: linear-gradient(135deg, #deb05a, var(--borda-clara));
+}
+
+/* ---------- Caixas de resultado ---------- */
+
+.resultado,
+.output {
+    background-color: rgba(46, 34, 18, 0.8);
+    border: 2px solid #7b5a3b;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    box-shadow: inset 0 0 10px #000;
+    animation: aparecer 0.4s ease-out;
+}
+
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 16px;
+    }
+
+    .section {
+        padding: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

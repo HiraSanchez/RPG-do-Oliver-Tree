@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Criação de Personagem - RPG</title>
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/ficha.css">
+
+    <!-- A ordem importa: cada arquivo usa classes dos arquivos de cima -->
+    <script src="js/util.js" defer></script>
+    <script src="js/dados.js" defer></script>
+
+    <!-- Modelo: as classes do jogo -->
+    <script src="js/modelo/efeitos.js" defer></script>
+    <script src="js/modelo/combatente.js" defer></script>
+    <script src="js/modelo/herois.js" defer></script>
+    <script src="js/modelo/monstros.js" defer></script>
+
+    <!-- Telas -->
+    <script src="js/telas/ficha.js" defer></script>
+    <script src="js/telas/menu.js" defer></script>
+    <script src="js/telas/criador-personagem.js" defer></script>
+</head>
+
+<body>
+    <menu-rpg></menu-rpg>
+
+    <main class="container">
+        <h1>Criação de Personagem</h1>
+        <section class="section">
+            <criador-personagem></criador-personagem>
+        </section>
+    </main>
+</body>
+
+</html>

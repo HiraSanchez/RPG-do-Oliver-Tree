@@ -1,0 +1,334 @@
+/* =====================================================================
+   ARENA DE BATALHA — cartões, barras de HP/MP, ações e log
+   ===================================================================== */
+
+.arena-aviso {
+    text-align: center;
+    color: var(--texto-suave);
+    font-style: italic;
+    padding: 20px;
+}
+
+.arena-aviso a,
+.arena-links a {
+    color: var(--destaque-claro);
+}
+
+.arena-links {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+}
+
+/* ---------- Combatentes ---------- */
+
+.combatentes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+}
+
+.versus {
+    font-family: var(--fonte-titulo);
+    font-size: 2rem;
+    color: var(--destaque);
+    text-shadow: 2px 2px 4px #000;
+}
+
+.cartao {
+    background: var(--fundo-caixa);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    transition: opacity 0.4s, filter 0.4s;
+}
+
+.cartao h3 {
+    font-size: 1.05rem;
+    margin: 8px 0;
+}
+
+.cartao-imagem {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--borda);
+}
+
+.cartao.atingido {
+    animation: tremer 0.35s;
+}
+
+.cartao.derrotado {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+@keyframes tremer {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+/* ---------- Barras de HP / MP ---------- */
+
+.barra {
+    position: relative;
+    height: 22px;
+    border-radius: 11px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--borda);
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.barra-preenchimento {
+    display: block;
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.barra-hp .barra-preenchimento {
+    background: linear-gradient(to right, #2e7d32, var(--sucesso));
+}
+
+.barra-hp.critica .barra-preenchimento {
+    background: linear-gradient(to right, #b71c1c, var(--perigo));
+}
+
+.barra-mp .barra-preenchimento {
+    background: linear-gradient(to right, #1565c0, var(--magia));
+}
+
+.barra-texto {
+    position: absolute;
+    inset: 0;
+    font-size: 0.8rem;
+    font-weight: bold;
+    line-height: 20px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* ---------- Efeitos de status ---------- */
+
+.efeitos {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    min-height: 26px;
+    margin-top: 8px;
+}
+
+.efeito {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+}
+
+.efeito-dano,
+.efeito-debuff { color: var(--perigo); }
+.efeito-cura { color: var(--sucesso); }
+.efeito-mana { color: var(--magia); }
+.efeito-buff { color: var(--ouro); }
+.efeito-atordoar { color: var(--alerta); }
+
+/* ---------- Ações ---------- */
+
+.acoes-batalha {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.acoes-batalha button {
+    font-size: 0.95rem;
+    padding: 12px 8px;
+}
+
+/* Número da tecla de atalho no canto do botão (sobrevive às trocas de texto) */
+.acoes-batalha button[data-atalho] {
+    position: relative;
+}
+
+.acoes-batalha button[data-atalho]::before {
+    content: attr(data-atalho);
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+.atalhos-dica {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    margin-top: 6px;
+}
+
+.acoes-secundarias {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.resultado-batalha {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid;
+}
+
+.resultado-titulo {
+    display: block;
+    font-family: var(--fonte-titulo);
+    font-size: 1.6rem;
+}
+
+.resultado-recompensa {
+    display: block;
+    color: var(--ouro);
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+.resumo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 18px;
+    margin-top: 10px;
+    color: var(--texto);
+    font-size: 0.9rem;
+}
+
+.resumo dt {
+    color: var(--texto-suave);
+    font-size: 0.75rem;
+}
+
+.resumo dd {
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.resultado-batalha.vitoria {
+    color: var(--sucesso);
+    background: rgba(76, 175, 80, 0.15);
+}
+
+.resultado-batalha.derrota {
+    color: var(--perigo);
+    background: rgba(244, 67, 54, 0.15);
+}
+
+.resultado-batalha.empate {
+    color: var(--destaque);
+    background: rgba(224, 185, 115, 0.15);
+}
+
+/* ---------- Log ---------- */
+
+.battle-log {
+    height: 420px;
+    overflow-y: auto;
+    border: 2px solid var(--borda);
+    padding: 16px;
+    margin-top: 16px;
+    background: linear-gradient(to bottom, rgba(30, 24, 20, 0.8), rgba(26, 26, 46, 0.9));
+    border-radius: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.battle-log::-webkit-scrollbar { width: 8px; }
+.battle-log::-webkit-scrollbar-track { background: rgba(46, 34, 18, 0.5); border-radius: 4px; }
+.battle-log::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 4px; }
+
+/* Uma cor por tipo de linha. O nome da classe vem da chave usada pelo
+   Narrador (ex.: narrar("dano", ...) vira class="log-dano") */
+.log-turno {
+    color: var(--destaque);
+    font-weight: bold;
+    margin-top: 12px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.log-inicio {
+    color: var(--destaque);
+    font-weight: bold;
+    text-align: center;
+}
+
+.log-hp { color: var(--texto-suave); font-size: 0.85rem; }
+.log-dano { color: var(--alerta); }
+.log-dano-efeito { color: #ff7043; font-style: italic; }
+.log-critico { color: var(--perigo); font-weight: bold; }
+.log-esquiva { color: #81c784; font-weight: bold; }
+.log-habilidade { color: var(--magia); font-weight: bold; font-style: italic; }
+.log-defesa { color: #90caf9; }
+.log-efeito,
+.log-dreno { color: #ce93d8; }
+.log-fim-efeito { color: var(--texto-suave); font-style: italic; }
+.log-resistencia { color: #9c27b0; font-style: italic; }
+.log-atordoado { color: var(--alerta); font-weight: bold; }
+.log-vantagem { color: var(--ouro); font-weight: bold; }
+.log-desvantagem { color: var(--perigo); font-weight: bold; }
+
+.log-pocao,
+.log-regeneracao,
+.log-cura-propria,
+.log-cura-efeito,
+.log-mana-efeito { color: var(--sucesso); }
+
+.log-xp,
+.log-subiu-nivel,
+.log-nivel-maximo { color: var(--ouro); font-weight: bold; text-align: center; }
+
+.log-vitoria,
+.log-derrota,
+.log-empate {
+    font-weight: bold;
+    text-align: center;
+    margin: 16px 0 4px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid;
+}
+
+.log-vitoria { color: var(--sucesso); background: rgba(76, 175, 80, 0.2); }
+.log-derrota { color: var(--perigo); background: rgba(244, 67, 54, 0.2); }
+.log-empate { color: var(--destaque); background: rgba(224, 185, 115, 0.2); }
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 700px) {
+    .combatentes {
+        grid-template-columns: 1fr;
+    }
+
+    .versus {
+        text-align: center;
+        font-size: 1.4rem;
+    }
+
+    .acoes-batalha {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .battle-log {
+        height: 320px;
+    }
+}

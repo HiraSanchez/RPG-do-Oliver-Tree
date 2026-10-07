@@ -1,0 +1,291 @@
+/* =====================================================================
+   FICHA + CRIADOR DE PERSONAGEM + GERADOR DE MONSTRO
+   ===================================================================== */
+
+/* ---------- Ficha (personagem e monstro) ---------- */
+
+.ficha {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 20px;
+}
+
+.ficha-imagem img {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    border: 2px solid var(--borda);
+    object-fit: cover;
+    background-color: var(--fundo-caixa);
+}
+
+.selo {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1e1814;
+    background: var(--destaque);
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.caixa {
+    background: var(--fundo-caixa);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--borda);
+}
+
+.caixa strong {
+    color: var(--destaque);
+}
+
+.atributos-principais,
+.vantagens-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.vantagens-grid {
+    margin-top: 16px;
+}
+
+.grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 12px;
+}
+
+.habilidade .custo {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    margin-left: 6px;
+}
+
+.habilidade p + p {
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.passiva {
+    color: var(--veneno);
+}
+
+.vantagem h5 {
+    color: var(--sucesso);
+    margin-bottom: 6px;
+}
+
+.desvantagem h5 {
+    color: var(--perigo);
+    margin-bottom: 6px;
+}
+
+.vantagem ul,
+.desvantagem ul {
+    list-style: none;
+}
+
+.vazio {
+    color: var(--texto-suave);
+    font-style: italic;
+}
+
+/* Link "Próximo passo" (Personagem -> Monstro -> Batalha) */
+.link-passo {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--destaque);
+    font-family: var(--fonte-botao);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--destaque);
+}
+
+.link-passo:hover {
+    color: #fff4c2;
+}
+
+/* ---------- Criador de personagem ---------- */
+
+.classe-descricao {
+    color: var(--texto-suave);
+    font-style: italic;
+    min-height: 1.5em;
+    margin-top: 6px;
+}
+
+.pontos-total {
+    text-align: center;
+    margin: 16px 0 8px;
+    font-size: 1.2rem;
+}
+
+.pontos-total span {
+    font-weight: 700;
+    color: var(--destaque-claro);
+}
+
+.pontos-total span[data-estado="completo"] {
+    color: var(--sucesso);
+}
+
+.atributos-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.atributo {
+    background: linear-gradient(to bottom, rgba(26, 26, 46, 0.6), rgba(22, 33, 62, 0.8));
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--borda);
+}
+
+.atributo label {
+    margin: 0;
+    color: var(--texto);
+}
+
+.atributo small {
+    display: block;
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    min-height: 2.4em;
+}
+
+.contador {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.contador input {
+    flex: 1;
+    min-width: 0; /* sem isso o campo não encolhe e estoura a largura no celular */
+    margin: 0;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.contador input::-webkit-outer-spin-button,
+.contador input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.botao-contador {
+    flex: 0 0 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.botoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.botoes-atributos {
+    margin: 4px 0 12px;
+}
+
+.dica {
+    background: rgba(224, 185, 115, 0.1);
+    border-left: 3px solid var(--destaque);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: var(--destaque-claro);
+}
+
+/* ---------- Experiência ---------- */
+
+.barra-xp {
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--borda);
+    overflow: hidden;
+}
+
+.barra-xp span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(to right, #b8860b, var(--ouro));
+}
+
+.xp-texto {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    margin: 2px 0 10px;
+}
+
+/* ---------- Gerador de monstro ---------- */
+
+.heroi-atual {
+    text-align: center;
+    color: var(--texto-suave);
+    margin-bottom: 14px;
+}
+
+.heroi-atual strong,
+.heroi-atual a {
+    color: var(--destaque-claro);
+}
+
+.controles-monstro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+}
+
+.controles-monstro label {
+    margin: 0 0 4px;
+}
+
+.controles-monstro select {
+    width: auto;
+    min-width: 170px;
+    margin: 0;
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 700px) {
+    .atributos-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ficha {
+        grid-template-columns: 1fr;
+    }
+
+    .ficha-imagem {
+        text-align: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .atributos-container,
+    .atributos-principais,
+    .vantagens-grid {
+        grid-template-columns: 1fr;
+    }
+}
