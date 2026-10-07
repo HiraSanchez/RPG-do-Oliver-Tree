@@ -1,0 +1,29 @@
+RPG EVOLUTION
+=============
+
+COMO JOGAR
+- No computador: abra o arquivo index.html (dois cliques). Não precisa instalar nada.
+- Online: [COLOCAR AQUI O LINK DO RENDER]
+
+PÁGINAS (siga nesta ordem)
+1. index.html ........ criação do personagem
+2. monstro.html ...... geração do monstro
+3. batalha.html ...... a batalha entre os dois
+
+O herói e o monstro ficam salvos no navegador, então uma página
+continua de onde a anterior parou. O XP ganho nas batalhas também fica salvo.
+Use Chrome ou Edge para abrir pelo computador.
+
+TESTES
+- testes.html ........ confere as regras do jogo (cada linha verde = teste ok)
+
+ORGANIZAÇÃO DO CÓDIGO (pasta js)
+- util.js ............ funções pequenas e a classe Sorteio
+- dados.js ........... números do jogo (vida, dano, defesas...)
+- modelo/ ............ classes do jogo: Combatente, Heroi, Monstro, Efeito e subclasses
+- batalha/ ........... regras da luta: Batalha, Acao, CalculadoraDeDano, Narrador
+- telas/ ............. o que aparece na página (formulários, ficha, arena)
+- testes.js .......... os testes usados por testes.html
+
+O diagrama de classes e onde está cada princípio de POO/SOLID
+estão no arquivo diagrama-classes.md.
