@@ -176,7 +176,7 @@ const DADOS_HEROIS = {
         }
     },
     "Bardo": {
-        imagem: "Imagens/bardo.jpg",
+        imagem: "Imagens/bardo.png",
         descricao: "Usa o carisma como arma: magia constante e MP quase infinito.",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
