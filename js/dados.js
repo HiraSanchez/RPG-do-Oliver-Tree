@@ -119,7 +119,7 @@ const DADOS_HEROIS = {
             esquiva: [5, { destreza: 0.3 }]
         }
     },
-    "Mago": 
+    "Mago": {
         imagem: "Imagens/mago.png",
         descricao: "Nyh, a amiga mais bela que o criador do RPG fez recentemente, suas habilidades mágicas são tão excepcionais quanto sua beleza",
         ataqueBasico: "magico",
