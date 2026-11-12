@@ -120,7 +120,9 @@ const DADOS_HEROIS = {
         }
     },
     "Mago": {
-        imagem: "Imagens/mago.png",
+        imagem: "Imagens/ladino.png",
+        //imagem: "Imagens/mago.png",
+        //descricaoDaniel: "Filho de Daniel Vorcaro, seus poderes mágicos são extraordinários",
         descricao: "Filho de Daniel Vorcaro, seus poderes mágicos são extraordinários",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
@@ -194,8 +196,12 @@ const DADOS_HEROIS = {
         }
     },
     "Ladino": {
-        imagem: "Imagens/ladino.png",
-        descricao: "Nyh, uma amiga divertida e admirável que o criador do RPG fez. Suas habilidades são tão excepcionais quanto sua beleza.",
+        imagem: "Imagens/Eterno_Amor.png",
+        //imagem: "Imagens/ladino.png",
+        //descricaoNyh: "Nyh, uma amiga divertida e admirável que o criador do RPG fez. Suas habilidades são tão excepcionais quanto sua beleza.",
+        descricao: "Lorena, princesa amada pelo coração do criador deste RPG. Infelizmente, acabei perdendo-a por falhas minhas, mas decidi eternizá-la neste jogo para nunca me esquecer do quanto ela foi especial para mim.
+
+",
         ataqueBasico: "fisico",
         danosUsados: ["fisico", "veneno"],
         formulas: {
