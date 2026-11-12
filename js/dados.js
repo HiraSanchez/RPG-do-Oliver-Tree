@@ -177,7 +177,7 @@ const DADOS_HEROIS = {
     },
     "Bardo": {
         imagem: "Imagens/bardo.png",
-        descricao: "Usa o carisma como arma: magia constante e MP quase infinito.",
+        descricao: "O criador do RPG, infelizmente só sobrou essa classe pra mim, mas não significa que é pouca coisa. Usa o carisma como arma: magia constante e MP quase infinito.",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
         formulas: {
