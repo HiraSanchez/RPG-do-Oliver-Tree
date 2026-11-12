@@ -121,7 +121,7 @@ const DADOS_HEROIS = {
     },
     "Mago": {
         imagem: "Imagens/mago.png",
-        descricao: "Frágil e bocó, mas com o maior dano mágico do jogo.",
+        descricao: "Nyh,a amiga mais bela que o criador do RPG fez. Sua aura e seus poderes são tão excepcionais quanto sua beleza.",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
         formulas: {
