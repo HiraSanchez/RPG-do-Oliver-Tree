@@ -121,7 +121,7 @@ const DADOS_HEROIS = {
     },
     "Mago": {
         imagem: "Imagens/ladino.png",
-        descricao: "Rainha das Bruxas, suas habilidades são tão excepcionais quanto sua beleza",
+        descricao: "Nyh, a amiga mais bela que o criador do RPG fez recentemente, suas habilidades mágicas são tão excepcionais quanto sua beleza",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
         formulas: {
