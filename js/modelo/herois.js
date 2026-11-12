@@ -2,30 +2,40 @@
 // HERÓIS
 // Heroi (abstrata) herda de Combatente e cuida do que é comum a todo
 // herói: atributos, nível e experiência.
-// Cada classe (Guerreiro, Mago Daniel...) herda de Heroi e implementa
+// Cada classe (Guerreiro, Mago...) herda de Heroi e implementa
 // a sua própria habilidade especial em usarHabilidade().
 // =====================================================================
 
 class Heroi extends Combatente {
+    #atributos;
+    #xp;
     constructor(nome, classe, atributos, nivel = 1, xp = 0) {
         if (new.target === Heroi) {
             throw new Error("Heroi é uma classe abstrata. Use uma classe, como Guerreiro.");
+        }
+        if (!Number.isInteger(nivel) || nivel < 1 || nivel > REGRAS.nivelMaximo) throw new RangeError("Nível de herói inválido.");
+        if (!atributos || typeof atributos !== "object" || Array.isArray(atributos) ||
+            ATRIBUTOS.some(a => !Number.isInteger(atributos[a.id] ?? 0) || (atributos[a.id] ?? 0) < 0 || (atributos[a.id] ?? 0) > REGRAS.maxPorAtributo) ||
+            Heroi.totalDePontos(atributos) > REGRAS.pontosAtributo) throw new RangeError("Atributos inválidos.");
+        if (!Number.isSafeInteger(xp) || xp < 0 || (nivel === REGRAS.nivelMaximo ? xp !== 0 : xp >= Heroi.xpParaSubir(nivel))) {
+            throw new RangeError("XP incompatível com o nível.");
         }
         const dados = DADOS_HEROIS[classe];
         const estatisticas = Heroi.calcularEstatisticas(classe, atributos, nivel);
         super(nome, dados.imagem, nivel, estatisticas, dados.ataqueBasico);
 
         this.classe = classe;
-        this.atributos = Object.assign({}, atributos); // cópia
-        this.xp = xp;
+        this.#atributos = Object.freeze({ ...atributos });
+        this.#xp = xp;
     }
 
+    get atributos() { return this.#atributos; }
+    get xp() { return this.#xp; }
+
     // Fórmula: valor base + (atributo x ganho por ponto).
-    // Depois o nível multiplica HP, MP, dano e defesas.
-    // Crítico e esquiva são porcentagens, então só ganham +1 por nível.
+    // MP e resistências preservam seu orçamento; HP, dano e armadura escalam.
     static calcularEstatisticas(classe, atributos, nivel) {
         const formulas = DADOS_HEROIS[classe].formulas;
-        const fator = fatorDeNivel(nivel);
         const estatisticas = {};
 
         for (const nome in formulas) {
@@ -41,11 +51,7 @@ class Heroi extends Combatente {
                 valor = valor + pontos * ganhos[atributo];
             }
 
-            if (nome === "critico" || nome === "esquiva") {
-                estatisticas[nome] = Math.round(valor + REGRAS.bonusPorcentagemNivel * (nivel - 1));
-            } else {
-                estatisticas[nome] = Math.round(valor * fator);
-            }
+            estatisticas[nome] = escalarEstatistica(nome, valor, nivel);
         }
         return estatisticas;
     }
@@ -60,8 +66,23 @@ class Heroi extends Combatente {
         return total;
     }
 
+    static tiposDeDano(classe) { return DADOS_HEROIS[classe].danosUsados; }
+
+    static ganhosDoAtributo(classe, atributo) {
+        return Object.entries(DADOS_HEROIS[classe].formulas)
+            .filter(([stat, formula]) => (!Object.hasOwn(TIPOS_DANO, stat) || this.tiposDeDano(classe).includes(stat)) && formula[1][atributo] > 0)
+            .map(([stat, formula]) => ({ stat, ganho: formula[1][atributo] }));
+    }
+
+    static atributosUteis(classe) {
+        return ATRIBUTOS.filter(a => this.ganhosDoAtributo(classe, a.id).length > 0);
+    }
+
     // Devolve a mensagem de erro, ou null se a distribuição está certa
     static validarAtributos(atributos) {
+        if (!atributos || typeof atributos !== "object" || Array.isArray(atributos)) {
+            return "Atributos inválidos.";
+        }
         for (const atributo of ATRIBUTOS) {
             const valor = atributos[atributo.id];
             if (!Number.isInteger(valor) || valor < 0 || valor > REGRAS.maxPorAtributo) {
@@ -81,15 +102,27 @@ class Heroi extends Combatente {
 
     // Recria um herói salvo no navegador. Devolve null se os dados estiverem estragados.
     static carregar(dados) {
-        if (!dados || !dados.nome || !CLASSES_HEROIS[dados.classe] || !dados.atributos) {
+        if (!dados || typeof dados.nome !== "string" || !dados.nome.trim() || dados.nome.length > 24 ||
+            typeof dados.classe !== "string") {
             return null;
         }
+        // Converte somente saves antigos; as opções do jogo usam os nomes atuais.
+        const classesAntigas = {
+            "Mago Daniel": "Mago",
+            "Arqueira Diovana": "Arqueira",
+            "Druida Vianey": "Druida"
+        };
+        const classe = Object.hasOwn(classesAntigas, dados.classe) ? classesAntigas[dados.classe] : dados.classe;
+        if (!Object.hasOwn(CLASSES_HEROIS, classe)) return null;
         if (Heroi.validarAtributos(dados.atributos) !== null) {
             return null;
         }
-        const nivel = limitar(parseInt(dados.nivel) || 1, 1, REGRAS.nivelMaximo);
-        const xp = Math.max(0, parseInt(dados.xp) || 0);
-        return criarHeroi(dados.nome, dados.classe, dados.atributos, nivel, xp);
+        const nivel = dados.nivel ?? 1;
+        const xp = dados.xp ?? 0;
+        if (!Number.isInteger(nivel) || nivel < 1 || nivel > REGRAS.nivelMaximo ||
+            !Number.isSafeInteger(xp) || xp < 0 ||
+            (nivel === REGRAS.nivelMaximo ? xp !== 0 : xp >= Heroi.xpParaSubir(nivel))) return null;
+        return criarHeroi(dados.nome.trim(), classe, dados.atributos, nivel, xp);
     }
 
     // O que vai para o localStorage
@@ -109,19 +142,22 @@ class Heroi extends Combatente {
 
     // Soma XP e sobe quantos níveis der. Devolve quantos níveis subiu.
     ganharXp(quantidade) {
+        numeroNaoNegativo(quantidade, "XP");
+        if (!Number.isSafeInteger(quantidade)) throw new RangeError("XP deve ser inteiro seguro.");
         if (this.estaNoNivelMaximo()) {
             return 0;
         }
 
-        this.xp = this.xp + quantidade;
+        if (!Number.isSafeInteger(this.#xp + quantidade)) throw new RangeError("XP excedeu o limite.");
+        this.#xp += quantidade;
         let niveisGanhos = 0;
         while (this.nivel < REGRAS.nivelMaximo && this.xp >= Heroi.xpParaSubir(this.nivel)) {
-            this.xp = this.xp - Heroi.xpParaSubir(this.nivel);
+            this.#xp -= Heroi.xpParaSubir(this.nivel);
             this.nivel++;
             niveisGanhos++;
         }
         if (this.nivel >= REGRAS.nivelMaximo) {
-            this.xp = 0;
+            this.#xp = 0;
         }
 
         if (niveisGanhos > 0) {
@@ -214,9 +250,9 @@ class Guerreiro extends Heroi {
     }
 }
 
-class MagoDaniel extends Heroi {
+class Mago extends Heroi {
     constructor(nome, atributos, nivel, xp) {
-        super(nome, "Mago Daniel", atributos, nivel, xp);
+        super(nome, "Mago", atributos, nivel, xp);
         this.habilidade = {
             nome: "Ataque Banco Master",
             descricao: "Dano mágico de 200% e deixa o alvo queimando por 2 turnos.",
@@ -234,12 +270,12 @@ class MagoDaniel extends Heroi {
     }
 }
 
-class ArqueiraDiovana extends Heroi {
+class Arqueira extends Heroi {
     constructor(nome, atributos, nivel, xp) {
-        super(nome, "Arqueira Diovana", atributos, nivel, xp);
+        super(nome, "Arqueira", atributos, nivel, xp);
         this.habilidade = {
             nome: "Flecha Venenosa da Rainha Taylor",
-            descricao: "Dano físico de 130%, envenena o alvo e dá +25% de crítico por 3 turnos.",
+            descricao: "Dano físico de 130%, envenena o alvo e dá +25 pontos percentuais de crítico por 3 ações, incluindo esta.",
             mensagem: "prepara uma flecha especial, banhada nas graças de Taylor Swift",
             custo: 15,
             recarga: 3
@@ -279,7 +315,7 @@ class Bardo extends Heroi {
         super(nome, "Bardo", atributos, nivel, xp);
         this.habilidade = {
             nome: "Canção de Batalha",
-            descricao: "Dano mágico de 140%; recupera 10% do MP e ganha +10% de crítico por 3 turnos.",
+            descricao: "Dano mágico de 140%; recupera 10% do MP máximo no início das próximas 3 ações e ganha +10 pontos percentuais de crítico por 3 ações, incluindo esta.",
             mensagem: "entoa uma melodia mágica que ressoa no ar",
             custo: 20,
             recarga: 3
@@ -297,7 +333,7 @@ class Ladino extends Heroi {
         super(nome, "Ladino", atributos, nivel, xp);
         this.habilidade = {
             nome: "Golpe Furtivo",
-            descricao: "Dano físico de 150% com +30% de chance de crítico; envenena o alvo.",
+            descricao: "Dano físico de 150% com +30 pontos percentuais de chance de crítico neste golpe; envenena o alvo.",
             mensagem: "se move com velocidade sobrenatural e ataca pelas sombras",
             custo: 15,
             recarga: 2
@@ -312,9 +348,9 @@ class Ladino extends Heroi {
     }
 }
 
-class DruidaVianey extends Heroi {
+class Druida extends Heroi {
     constructor(nome, atributos, nivel, xp) {
-        super(nome, "Druida Vianey", atributos, nivel, xp);
+        super(nome, "Druida", atributos, nivel, xp);
         this.habilidade = {
             nome: "Chamado da Oracle",
             descricao: "Dano mágico de 150%, envenena o alvo em um loop for e regenera 8% do HP por 3 turnos.",
@@ -338,7 +374,7 @@ class Barbaro extends Heroi {
         super(nome, "Bárbaro", atributos, nivel, xp);
         this.habilidade = {
             nome: "Fúria Berserker",
-            descricao: "Dano físico de 200% e entra em fúria (+30% de defesa, +10% de crítico) por 3 turnos.",
+            descricao: "Dano físico de 200% e entra em fúria (+30% de defesa, +10 pontos percentuais de crítico) por 3 ações, incluindo esta.",
             mensagem: "entra em fúria berserker, os olhos brilhando de ódio",
             custo: 8,
             recarga: 3
@@ -357,19 +393,19 @@ class Barbaro extends Heroi {
 // em dados.js e adicione uma linha aqui. Nada mais precisa mudar.
 const CLASSES_HEROIS = {
     "Guerreiro": Guerreiro,
-    "Mago Daniel": MagoDaniel,
-    "Arqueira Diovana": ArqueiraDiovana,
+    "Mago": Mago,
+    "Arqueira": Arqueira,
     "Paladino": Paladino,
     "Bardo": Bardo,
     "Ladino": Ladino,
-    "Druida Vianey": DruidaVianey,
+    "Druida": Druida,
     "Bárbaro": Barbaro
 };
 
 function criarHeroi(nome, classe, atributos, nivel = 1, xp = 0) {
-    const ClasseDoHeroi = CLASSES_HEROIS[classe];
-    if (ClasseDoHeroi === undefined) {
+    if (!Object.hasOwn(CLASSES_HEROIS, classe)) {
         throw new Error("Classe inválida: " + classe);
     }
+    const ClasseDoHeroi = CLASSES_HEROIS[classe];
     return new ClasseDoHeroi(nome, atributos, nivel, xp);
 }

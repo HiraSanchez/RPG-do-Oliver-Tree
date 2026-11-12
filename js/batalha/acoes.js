@@ -2,7 +2,7 @@
 // AÇÕES DO TURNO (Atacar, Habilidade, Defender, Poção)
 // Cada ação é uma classe. A Batalha guarda uma lista delas e só chama
 // executar(), sem precisar de um switch. Para criar uma ação nova é
-// só criar outra classe e colocar na lista da Batalha (Aberto/Fechado).
+// só criar outra classe e injetá-la pelo ponto de composição (fabrica.js).
 // =====================================================================
 
 class Acao {
@@ -59,7 +59,7 @@ class UsarPocao extends Acao {
     }
 
     executar(ator, alvo, batalha) {
-        batalha.pocoes--;
+        if (!batalha.inventario.consumir("pocao")) return;
         const curado = ator.curar(ator.getHpMaximo() * REGRAS.curaPocao);
         batalha.narrar("pocao", { ator: ator, valor: curado, restantes: batalha.pocoes });
     }

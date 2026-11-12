@@ -10,22 +10,17 @@
 // =====================================================================
 
 class Batalha {
-    constructor(heroi, monstro, narrador, sorteio) {
+    constructor(heroi, monstro, { narrador, sorteio, calculadora, acoes, inventario, recompensas }) {
         this.heroi = heroi;
         this.monstro = monstro;
         this.narrador = narrador;
         this.sorteio = sorteio;
-        this.calculadora = new CalculadoraDeDano(sorteio);
-
-        this.acoes = {
-            atacar: new Atacar(),
-            habilidade: new UsarHabilidade(),
-            defender: new Defender(),
-            pocao: new UsarPocao()
-        };
+        this.calculadora = calculadora;
+        this.acoes = Object.freeze({ ...acoes });
+        this.inventario = inventario;
+        this.recompensas = recompensas;
 
         this.turno = 1;
-        this.pocoes = REGRAS.pocoesPorBatalha;
         this.resultado = null; // "vitoria", "derrota" ou "empate"
         this.recompensaXp = 0;
         this.niveisGanhos = 0;
@@ -42,6 +37,8 @@ class Batalha {
     terminou() {
         return this.resultado !== null;
     }
+
+    get pocoes() { return this.inventario.quantidade("pocao"); }
 
     placarDe(combatente) {
         if (combatente === this.heroi) {
@@ -73,6 +70,8 @@ class Batalha {
         }
 
         this.narrar("turno", { numero: this.turno });
+        this.heroi.iniciarRodada();
+        this.monstro.iniciarRodada();
 
         this.agir(this.heroi, this.monstro, nomeDaAcao);
         if (this.verificarFim()) {
@@ -85,6 +84,8 @@ class Batalha {
         }
 
         this.narrar("hp", { heroi: this.heroi, monstro: this.monstro });
+        this.heroi.finalizarRodada(this);
+        this.monstro.finalizarRodada(this);
         this.turno++;
         if (this.turno > REGRAS.limiteTurnos) {
             this.resultado = "empate";
@@ -106,7 +107,7 @@ class Batalha {
             if (nomeDaAcao === null) {
                 nomeDaAcao = ator.escolherAcao(this);
             }
-            let acao = this.acoes[nomeDaAcao];
+            let acao = Object.hasOwn(this.acoes, nomeDaAcao) ? this.acoes[nomeDaAcao] : undefined;
             if (acao === undefined || !acao.podeExecutar(ator, this)) {
                 acao = this.acoes.atacar;
             }
@@ -121,31 +122,7 @@ class Batalha {
     // Efeitos (veneno, cura...) agem no começo do turno.
     // Devolve false se o combatente perdeu a vez.
     iniciarTurnoDe(ator) {
-        let perdeAVez = false;
-
-        for (const efeito of ator.getEfeitos()) {
-            if (efeito.impedeAcao()) {
-                perdeAVez = true;
-            }
-            efeito.aoIniciarTurno(ator, this);
-            efeito.restante--;
-
-            if (efeito.restante <= 0) {
-                ator.removerEfeito(efeito.id);
-                if (efeito.avisaQuandoTermina()) {
-                    this.narrar("fim-efeito", { alvo: ator, efeito: efeito });
-                }
-            }
-            if (!ator.estaVivo()) {
-                return false;
-            }
-        }
-
-        if (perdeAVez) {
-            this.narrar("atordoado", { ator: ator });
-            return false;
-        }
-        return true;
+        return ator.processarEfeitos(this);
     }
 
     // Recarga, MP e passivas ficam no fim do turno, assim os botões
@@ -224,6 +201,7 @@ class Batalha {
     // ---------- Fim da batalha ----------
 
     verificarFim() {
+        if (this.terminou()) return true;
         const dados = { heroi: this.heroi, monstro: this.monstro };
 
         if (!this.monstro.estaVivo()) {
@@ -244,10 +222,11 @@ class Batalha {
             return;
         }
 
-        this.recompensaXp = this.monstro.calcularXp(this.heroi.nivel);
+        const recompensa = this.recompensas.entregar(this.heroi, this.monstro);
+        this.recompensaXp = recompensa.xp;
         this.narrar("xp", { heroi: this.heroi, valor: this.recompensaXp });
 
-        this.niveisGanhos = this.heroi.ganharXp(this.recompensaXp);
+        this.niveisGanhos = recompensa.niveis;
         if (this.niveisGanhos > 0) {
             this.narrar("subiu-nivel", { heroi: this.heroi });
         }

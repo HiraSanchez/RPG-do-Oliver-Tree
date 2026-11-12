@@ -8,7 +8,7 @@ const Ficha = {
     html: function (combatente, selo = "") {
         // Uma linha "Nome: valor" da ficha (sem os efeitos de batalha)
         function linha(estatistica, sufixo = "") {
-            const valor = Math.round(combatente.getStatBase(estatistica));
+            const valor = Math.round(Math.min(combatente.getStatBase(estatistica), limiteEstatistica(estatistica)) * 100) / 100;
             return "<p><strong>" + ESTATISTICAS[estatistica] + ":</strong> " + valor + sufixo + "</p>";
         }
 
@@ -62,6 +62,10 @@ const Ficha = {
         if (selo !== "") {
             htmlSelo = '<span class="selo">' + selo + "</span>";
         }
+        const categoria = combatente instanceof Monstro
+            ? '<p>' + escaparHtml(combatente.getCategoria()) + ' · recompensa de XP ×' + combatente.getMultiplicadorXp() + '</p>' : '';
+        const tiposUsados = combatente instanceof Heroi ? Heroi.tiposDeDano(combatente.classe) :
+            Object.keys(TIPOS_DANO).filter(tipo => combatente.getStatBase(tipo) > 0);
 
         return `
             <article class="ficha">
@@ -71,6 +75,7 @@ const Ficha = {
                 <div class="ficha-detalhes">
                     ${htmlSelo}
                     <h3>${escaparHtml(combatente.getTitulo())}</h3>
+                    ${categoria}
                     ${barraXp}
 
                     <div class="atributos-principais">
@@ -80,7 +85,7 @@ const Ficha = {
 
                     <h4>Dano</h4>
                     <div class="caixa grade">
-                        ${linha("fisico")}${linha("magico")}${linha("veneno")}${linha("sagrado")}
+                        ${tiposUsados.map(tipo => linha(tipo)).join("")}
                     </div>
 
                     <h4>Defesas</h4>
@@ -91,7 +96,7 @@ const Ficha = {
                     ${caixaHabilidade}
 
                     <div class="vantagens-grid">
-                        <div class="caixa vantagem"><h5>Forte contra</h5><ul>${lista(combatente.getForteContra())}</ul></div>
+                        <div class="caixa vantagem"><h5>Forte contra (+25% nos golpes diretos)</h5><ul>${lista(combatente.getForteContra())}</ul></div>
                         <div class="caixa desvantagem"><h5>Fraco contra</h5><ul>${lista(combatente.getFracoContra())}</ul></div>
                     </div>
                 </div>

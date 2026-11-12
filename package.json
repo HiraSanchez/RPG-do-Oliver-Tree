@@ -1,0 +1,13 @@
+{
+  "name": "rpg-do-oliver-tree",
+  "version": "1.1.0",
+  "private": true,
+  "description": "RPG em terminal e navegador, com POO e SOLID",
+  "scripts": {
+    "start": "node rpg.cjs",
+    "build": "node scripts/publicar.cjs",
+    "test": "node scripts/testar.cjs",
+    "balancear": "node scripts/simular.cjs --amostras 300 --saida tmp/simulacoes/nova-simulacao.json"
+  },
+  "engines": { "node": ">=22" }
+}

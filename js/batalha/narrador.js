@@ -32,7 +32,7 @@ class MensagensPtBr {
             case "inicio":
                 return d.heroi.getTitulo() + " enfrenta " + d.monstro.getTitulo() + "!";
             case "vantagem":
-                return d.heroi.nome + " sente uma energia favorável. Sua experiência contra " + d.monstro.nome + " lhe dá vantagem! (+" + this.porcentagem(REGRAS.bonusVantagem - 1) + " de dano)";
+                return d.heroi.nome + " sente uma energia favorável. Sua experiência contra " + d.monstro.nome + " lhe dá vantagem! (+" + this.porcentagem(REGRAS.bonusVantagem - 1) + " nos golpes diretos)";
             case "desvantagem":
                 return d.monstro.nome + " tem um brilho sinistro nos olhos. Sua natureza é especialmente perigosa para " + d.heroi.nome + "! (+" + this.porcentagem(REGRAS.bonusVantagem - 1) + " de dano)";
             case "turno":
@@ -91,7 +91,7 @@ class MensagensPtBr {
             case "xp":
                 return d.heroi.nome + " ganha " + d.valor + " de experiência!";
             case "subiu-nivel":
-                return d.heroi.nome + " subiu para o nível " + d.heroi.nivel + "! HP, MP, dano e defesas aumentaram.";
+                return d.heroi.nome + " subiu para o nível " + d.heroi.nivel + "! HP, dano e armaduras aumentaram; MP e resistências preservam seus valores.";
             case "nivel-maximo":
                 return d.heroi.nome + " já está no nível máximo e não ganha mais experiência.";
 

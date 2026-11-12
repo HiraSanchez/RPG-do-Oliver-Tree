@@ -1,0 +1,4 @@
+node_modules/
+.rpg-save.json
+tmp/
+dist/

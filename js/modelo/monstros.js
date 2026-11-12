@@ -18,11 +18,10 @@ class Monstro extends Combatente {
         this.vantagens = dados.vantagens;
     }
 
-    // O nível multiplica os valores. Crítico e esquiva só ganham +1% por nível.
+    // HP, dano e armadura escalam; MP e resistências mantêm o orçamento.
     // REGRAS.vidaMonstros e REGRAS.danoMonstros deixam todos os monstros
     // mais fortes ou mais fracos de uma vez (usado para balancear o jogo).
     static calcularEstatisticas(valoresNivel1, nivel) {
-        const fator = fatorDeNivel(nivel);
         const estatisticas = {};
         for (const nome in valoresNivel1) {
             let valor = valoresNivel1[nome];
@@ -33,11 +32,7 @@ class Monstro extends Combatente {
                 valor = valor * REGRAS.danoMonstros;
             }
 
-            if (nome === "critico" || nome === "esquiva") {
-                estatisticas[nome] = valor + REGRAS.bonusPorcentagemNivel * (nivel - 1);
-            } else {
-                estatisticas[nome] = Math.round(valor * fator);
-            }
+            estatisticas[nome] = escalarEstatistica(nome, valor, nivel);
         }
         return estatisticas;
     }
@@ -49,10 +44,11 @@ class Monstro extends Combatente {
 
     // Recria o monstro salvo. Devolve null se os dados estiverem estragados.
     static carregar(dados) {
-        if (!dados || !CLASSES_MONSTROS[dados.tipo]) {
+        if (!dados || typeof dados.tipo !== "string" || !Object.hasOwn(CLASSES_MONSTROS, dados.tipo)) {
             return null;
         }
-        const nivel = limitar(parseInt(dados.nivel) || 1, 1, REGRAS.nivelMaximo + 2);
+        const nivel = dados.nivel ?? 1;
+        if (!Number.isInteger(nivel) || nivel < 1 || nivel > REGRAS.nivelMaximo + 2) return null;
         return criarMonstro(dados.tipo, nivel);
     }
 
@@ -61,8 +57,12 @@ class Monstro extends Combatente {
     calcularXp(nivelDoHeroi) {
         const diferenca = this.nivel - nivelDoHeroi;
         const multiplicador = limitar(1 + 0.25 * diferenca, 0.25, 2);
-        return Math.max(1, Math.round(REGRAS.xpPorNivelMonstro * this.nivel * multiplicador));
+        return Math.max(1, Math.round(REGRAS.xpPorNivelMonstro * this.nivel * multiplicador * this.getMultiplicadorXp()));
     }
+
+    getMultiplicadorXp() { return DADOS_MONSTROS[this.tipo].recompensa; }
+
+    getCategoria() { return DADOS_MONSTROS[this.tipo].categoria; }
 
     // ---------- Sobrescritos de Combatente ----------
 
@@ -241,7 +241,7 @@ class Basilisco extends Monstro {
         super("Basilisco", nivel);
         this.habilidade = {
             nome: "Olhar Petrificante",
-            descricao: "Dano venenoso de 150% e petrifica: -30% de defesa e -50% de esquiva por 3 turnos.",
+            descricao: "Dano venenoso de 150% e petrifica: reduz a resistência a veneno em 30% e a esquiva em 50% por 3 rodadas completas após esta.",
             mensagem: "fixa seu olhar petrificante e libera veneno mortal",
             custo: 12,
             recarga: 3
@@ -331,9 +331,9 @@ const CLASSES_MONSTROS = {
 };
 
 function criarMonstro(tipo, nivel) {
-    const ClasseDoMonstro = CLASSES_MONSTROS[tipo];
-    if (ClasseDoMonstro === undefined) {
+    if (!Object.hasOwn(CLASSES_MONSTROS, tipo)) {
         throw new Error("Monstro desconhecido: " + tipo);
     }
+    const ClasseDoMonstro = CLASSES_MONSTROS[tipo];
     return new ClasseDoMonstro(nivel);
 }

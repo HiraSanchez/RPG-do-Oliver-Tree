@@ -1,0 +1,10 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const { carregarJogo } = require('./carregar-jogo.cjs');
+const { contexto } = carregarJogo({ console: { log() {} }, document: { getElementById: () => ({ innerHTML: '' }) } });
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../js/testes.js'), 'utf8'), contexto);
+const resultados = vm.runInContext('resultados', contexto);
+for (const r of resultados) console.log(`${r.passou ? 'OK' : 'FALHOU'} ${r.descricao}${r.erro ? ': ' + r.erro : ''}`);
+console.log(`${resultados.filter(r => r.passou).length}/${resultados.length} testes passaram.`);
+if (resultados.some(r => !r.passou)) process.exitCode = 1;

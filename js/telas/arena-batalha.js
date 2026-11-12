@@ -7,6 +7,7 @@
 class ArenaBatalha extends HTMLElement {
     connectedCallback() {
         if (this.painel) {
+            document.addEventListener("keydown", this.ouvirTecla);
             return; // já foi montado
         }
 
@@ -26,7 +27,7 @@ class ArenaBatalha extends HTMLElement {
                 <div class="acoes-batalha">
                     <button type="button" data-acao="atacar" data-atalho="1" title="Ataque básico da sua classe (tecla 1)">Atacar</button>
                     <button type="button" data-acao="habilidade" data-atalho="2">Habilidade</button>
-                    <button type="button" data-acao="defender" data-atalho="3" title="Reduz o próximo dano em ${reducaoDefesa}% e recupera ${mpDefesa}% do MP (tecla 3)">Defender</button>
+                    <button type="button" data-acao="defender" data-atalho="3" title="Reduz todos os golpes diretos em ${reducaoDefesa}% até sua próxima ação e recupera ${mpDefesa}% do MP; não reduz veneno/queimadura (tecla 3)">Defender</button>
                     <button type="button" data-acao="pocao" data-atalho="4" title="Recupera ${curaPocao}% do HP máximo (tecla 4)">Poção</button>
                 </div>
                 <p class="atalhos-dica">Atalhos: teclas 1 a 4 para as ações.</p>
@@ -57,13 +58,15 @@ class ArenaBatalha extends HTMLElement {
         this.monstro = Monstro.carregar(armazenamento.ler(CHAVE_MONSTRO_SALVO));
 
         this.addEventListener("click", (evento) => this.aoClicar(evento));
-        document.addEventListener("keydown", (evento) => this.aoTeclar(evento));
+        this.ouvirTecla = (evento) => this.aoTeclar(evento);
+        document.addEventListener("keydown", this.ouvirTecla);
 
         this.novaBatalha();
     }
 
     disconnectedCallback() {
         this.pararAuto();
+        document.removeEventListener("keydown", this.ouvirTecla);
     }
 
     novaBatalha() {
@@ -88,7 +91,7 @@ class ArenaBatalha extends HTMLElement {
         // Aqui as dependências são montadas e entregues prontas para a Batalha
         this.saidaLog.limpar();
         const narrador = new Narrador(new MensagensPtBr(), this.saidaLog);
-        this.batalha = new Batalha(this.personagem, this.monstro, narrador, new Sorteio());
+        this.batalha = criarBatalha(this.personagem, this.monstro, narrador, new Sorteio());
 
         this.montarCartao("heroi", this.personagem);
         this.montarCartao("monstro", this.monstro);
@@ -119,6 +122,7 @@ class ArenaBatalha extends HTMLElement {
 
     // Teclas 1 a 4 apertam os botões de ação (menos quando está digitando)
     aoTeclar(evento) {
+        if (!["1", "2", "3", "4"].includes(evento.key) || evento.repeat) return;
         if (this.batalha === null || this.painel.hidden) {
             return;
         }
@@ -142,7 +146,10 @@ class ArenaBatalha extends HTMLElement {
             this.pararAuto();
             // Ganhou: salva o XP (e o nível novo) do herói
             if (this.batalha.resultado === "vitoria") {
-                armazenamento.salvar(CHAVE_HEROI_SALVO, this.personagem.paraSalvar());
+                if (!armazenamento.salvar(CHAVE_HEROI_SALVO, this.personagem.paraSalvar())) {
+                    this.aviso.hidden = false;
+                    this.aviso.textContent = "Não foi possível salvar o XP. Permita o armazenamento do navegador antes de sair desta página.";
+                }
                 this.querySelector('[data-cartao="heroi"] h3').textContent = this.personagem.getTitulo();
             }
         }

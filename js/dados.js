@@ -18,20 +18,19 @@ const REGRAS = {
     regeneracaoMp: 0.05,       // 5% do MP máximo no fim de cada turno (mínimo 2)
     pocoesPorBatalha: 3,
     curaPocao: 0.35,           // 35% do HP máximo
-    reducaoDefendendo: 0.5,    // "Defender" reduz o próximo dano recebido pela metade
+    reducaoDefendendo: 0.5,    // todos os golpes diretos até a próxima ação
     mpAoDefender: 0.15,        // e recupera 15% do MP
     limiteTurnos: 50,          // depois disso a batalha termina empatada
 
     // Força geral dos monstros (1 = valores da tabela DADOS_MONSTROS).
-    // Ajustado por simulação: contra monstro do mesmo nível o herói vence
-    // ~85% das vezes, 1 nível acima ~60% e 2 níveis acima ~35%.
+    // Regras em docs/regras.md; novas simulações em scripts/simular.cjs.
     vidaMonstros: 1.6,
     danoMonstros: 1.15,
 
     // Níveis e experiência
     nivelMaximo: 20,
-    crescimentoPorNivel: 1.1,  // cada nível multiplica HP, MP, dano e defesas por 1,1
-    bonusPorcentagemNivel: 1,  // +1% de crítico e esquiva por nível
+    crescimentoPorNivel: 1.1,  // HP, dano e armaduras; MP e resistências não escalam
+    bonusPorcentagemNivel: 0.25, // pontos percentuais de crítico/esquiva por nível
     xpPorNivelMonstro: 35,     // XP base por nível do monstro derrotado
     xpBaseNivel: 100           // XP para subir do nível N para o N+1 = 100 x N
 };
@@ -39,6 +38,24 @@ const REGRAS = {
 // Nível 1 = 1x, nível 2 = 1,1x, nível 3 = 1,21x, nível 10 = 2,4x...
 function fatorDeNivel(nivel) {
     return Math.pow(REGRAS.crescimentoPorNivel, nivel - 1);
+}
+
+function escalarEstatistica(nome, valor, nivel) {
+    // Recursos e resistências preservam a economia e as fraquezas da classe.
+    if (nome === "mp" || nome === "resVeneno" || nome === "resSagrado") {
+        return Math.round(valor);
+    }
+    if (nome === "critico" || nome === "esquiva") {
+        return Math.round(valor) + REGRAS.bonusPorcentagemNivel * (nivel - 1);
+    }
+    return Math.round(Math.round(valor) * fatorDeNivel(nivel));
+}
+
+function limiteEstatistica(nome) {
+    if (nome === "resVeneno" || nome === "resSagrado") return REGRAS.resistenciaMaxima;
+    if (nome === "critico") return REGRAS.criticoMaximo;
+    if (nome === "esquiva") return REGRAS.esquivaMaxima;
+    return Infinity;
 }
 
 const ATRIBUTOS = [
@@ -88,6 +105,7 @@ const DADOS_HEROIS = {
         imagem: "Imagens/guerreiro.png",
         descricao: "Linha de frente: muito HP e defesa, dano físico consistente.",
         ataqueBasico: "fisico",
+        danosUsados: ["fisico"],
         formulas: {
             hp: [90, { forca: 3, constituicao: 2 }],
             mp: [30, { inteligencia: 0.5 }],
@@ -101,10 +119,11 @@ const DADOS_HEROIS = {
             esquiva: [5, { destreza: 0.3 }]
         }
     },
-    "Mago Daniel": {
-        imagem: "Imagens/daniel.jpg",
+    "Mago": {
+        imagem: "Imagens/mago.png",
         descricao: "Frágil e bocó, mas com o maior dano mágico do jogo.",
         ataqueBasico: "magico",
+        danosUsados: ["magico"],
         formulas: {
             hp: [85, { constituicao: 2 }],
             mp: [100, { inteligencia: 2.5, sabedoria: 1.5 }],
@@ -118,10 +137,11 @@ const DADOS_HEROIS = {
             esquiva: [3, { destreza: 0.2 }]
         }
     },
-    "Arqueira Diovana": {
+    "Arqueira": {
         imagem: "Imagens/dih.png",
         descricao: "Ágil e precisa: muito crítico e esquiva.",
         ataqueBasico: "fisico",
+        danosUsados: ["fisico", "veneno"],
         formulas: {
             hp: [105, { constituicao: 2 }],
             mp: [40, { inteligencia: 0.8 }],
@@ -137,9 +157,10 @@ const DADOS_HEROIS = {
         }
     },
     "Paladino": {
-        imagem: "Imagens/paladino.jpg",
+        imagem: "Imagens/paladino.png",
         descricao: "Guerreiro sagrado: resistente e capaz de se curar.",
         ataqueBasico: "fisico",
+        danosUsados: ["fisico", "sagrado"],
         formulas: {
             hp: [85, { forca: 2, constituicao: 1.8 }],
             mp: [70, { sabedoria: 1.5 }],
@@ -158,8 +179,9 @@ const DADOS_HEROIS = {
         imagem: "Imagens/bardo.jpg",
         descricao: "Usa o carisma como arma: magia constante e MP quase infinito.",
         ataqueBasico: "magico",
+        danosUsados: ["magico"],
         formulas: {
-            hp: [105, { constituicao: 2 }],
+            hp: [110, { constituicao: 2 }],
             mp: [80, { carisma: 2 }],
             fisico: [8, { destreza: 0.7 }],
             magico: [18, { carisma: 1.5 }],
@@ -173,10 +195,11 @@ const DADOS_HEROIS = {
     },
     "Ladino": {
         imagem: "Imagens/ladino.png",
-        descricao: "Mestre dos golpes críticos e venenos.",
+        descricao: "Lorena, princesa amada pelo coração do criador deste RPG. Infelizmente, acabei perdendo-a por falhas minhas, mas decidi eternizá-la neste jogo para nunca me esquecer do quanto ela foi especial para mim.",
         ataqueBasico: "fisico",
+        danosUsados: ["fisico", "veneno"],
         formulas: {
-            hp: [85, { constituicao: 2 }],
+            hp: [90, { constituicao: 2 }],
             mp: [40, { inteligencia: 0.8 }],
             fisico: [12, { destreza: 1.2 }],
             veneno: [8, { inteligencia: 0.8 }],
@@ -188,10 +211,11 @@ const DADOS_HEROIS = {
             esquiva: [15, { destreza: 0.8 }]
         }
     },
-    "Druida Vianey": {
-        imagem: "Imagens/vianey.jpg",
-        descricao: "Magia da natureza: dano, veneno, java e regeneração.",
+    "Druida": {
+        imagem: "Imagens/druida.png",
+        descricao: "Manu, pequena e simpática, apaixonada pela natureza e amiga do criador deste RPG.",
         ataqueBasico: "magico",
+        danosUsados: ["magico", "veneno"],
         formulas: {
             hp: [85, { constituicao: 2 }],
             mp: [90, { sabedoria: 2 }],
@@ -208,8 +232,9 @@ const DADOS_HEROIS = {
     },
     "Bárbaro": {
         imagem: "Imagens/barbaro.png",
-        descricao: "Força bruta: o maior HP e dano físico, pouca magia.",
+        descricao: "Força bruta: o maior HP e uma habilidade física devastadora, pouca magia.",
         ataqueBasico: "fisico",
+        danosUsados: ["fisico"],
         formulas: {
             hp: [110, { forca: 2.5, constituicao: 2 }],
             mp: [20, { inteligencia: 0.3 }],
@@ -234,11 +259,11 @@ const DISTRIBUICAO_RECOMENDADA = {
         pontos: { forca: 10, destreza: 6, inteligencia: 0, constituicao: 10, sabedoria: 4, carisma: 0 },
         motivo: "Força e Constituição no máximo: mais HP, dano e defesa. Destreza para crítico e esquiva, e Sabedoria para aguentar magia."
     },
-    "Mago Daniel": {
+    "Mago": {
         pontos: { forca: 0, destreza: 4, inteligencia: 10, constituicao: 6, sabedoria: 10, carisma: 0 },
         motivo: "Inteligência e Sabedoria no máximo: as duas aumentam o dano mágico e o MP. Constituição compensa o HP baixo."
     },
-    "Arqueira Diovana": {
+    "Arqueira": {
         pontos: { forca: 0, destreza: 10, inteligencia: 4, constituicao: 10, sabedoria: 6, carisma: 0 },
         motivo: "Destreza no máximo: dano, crítico, esquiva e veneno das flechas. Constituição para HP e Sabedoria para defesa mágica."
     },
@@ -254,13 +279,13 @@ const DISTRIBUICAO_RECOMENDADA = {
         pontos: { forca: 0, destreza: 10, inteligencia: 8, constituicao: 10, sabedoria: 2, carisma: 0 },
         motivo: "Destreza no máximo para dano, crítico e esquiva; Inteligência deixa o veneno mais forte."
     },
-    "Druida Vianey": {
+    "Druida": {
         pontos: { forca: 0, destreza: 10, inteligencia: 0, constituicao: 10, sabedoria: 10, carisma: 0 },
-        motivo: "Sabedoria no máximo: magia, veneno e MP do Druida Vianey vêm dela. Constituição para HP e resistência a veneno, Destreza para esquiva."
+        motivo: "Sabedoria no máximo: magia, veneno e MP do Druida vêm dela. Constituição para HP e resistência a veneno, Destreza para esquiva."
     },
     "Bárbaro": {
         pontos: { forca: 10, destreza: 4, inteligencia: 2, constituicao: 10, sabedoria: 4, carisma: 0 },
-        motivo: "Força e Constituição no máximo: o maior HP e dano físico do jogo. O pouco MP que tem vem da Inteligência."
+        motivo: "Força e Constituição no máximo: muito HP e golpes fortes. Inteligência aumenta o pequeno orçamento de MP."
     }
 };
 
@@ -273,73 +298,83 @@ const DISTRIBUICAO_RECOMENDADA = {
 // ---------------------------------------------------------------------
 const DADOS_MONSTROS = {
     "Goblin": {
+        categoria: "Comum", recompensa: 0.45,
         imagem: "Imagens/goblin.png",
         ataqueBasico: "fisico",
         estatisticas: { hp: 110, mp: 0, fisico: 14, defesa: 5, defesaMagica: 5, resVeneno: 3, resSagrado: 3, critico: 10, esquiva: 12 },
         fraquezas: ["Guerreiro", "Bárbaro"],          // força bruta esmaga o baixinho
-        vantagens: ["Mago Daniel", "Bardo"]           // frágeis quando pegos de perto
+        vantagens: ["Mago", "Bardo"]           // frágeis quando pegos de perto
     },
     "Ogro": {
+        categoria: "Elite", recompensa: 1.1,
         imagem: "Imagens/ogro.png",
         ataqueBasico: "fisico",
         estatisticas: { hp: 160, mp: 10, fisico: 19, defesa: 12, defesaMagica: 5, resVeneno: 8, resSagrado: 5, critico: 5, esquiva: 3 },
-        fraquezas: ["Mago Daniel", "Arqueira Diovana"], // lento contra ataques à distância
+        fraquezas: ["Mago", "Arqueira"], // lento contra ataques à distância
         vantagens: ["Guerreiro", "Bárbaro"]           // ganha no corpo a corpo
     },
     "Dragão": {
+        categoria: "Chefe", recompensa: 1.6,
         imagem: "Imagens/dragao.jpg",
         ataqueBasico: "fisico",
         estatisticas: { hp: 185, mp: 40, fisico: 18, magico: 16, defesa: 15, defesaMagica: 12, resVeneno: 10, resSagrado: 8, critico: 12, esquiva: 6 },
-        fraquezas: ["Paladino", "Arqueira Diovana"],  // luz sagrada e flechas nas asas
-        vantagens: ["Druida Vianey", "Bárbaro"]       // fogo queima a natureza; bárbaro não aguenta magia
+        fraquezas: ["Paladino", "Arqueira"],  // luz sagrada e flechas nas asas
+        vantagens: ["Druida", "Bárbaro"]       // fogo queima a natureza; bárbaro não aguenta magia
     },
     "Lich": {
+        categoria: "Chefe", recompensa: 1.3,
         imagem: "Imagens/lich.png",
         ataqueBasico: "magico",
         estatisticas: { hp: 120, mp: 60, fisico: 6, magico: 21, sagrado: 21, defesa: 8, defesaMagica: 15, resVeneno: 12, resSagrado: 5, critico: 8, esquiva: 5 },
         fraquezas: ["Paladino", "Bárbaro"],           // luz sagrada e força bruta contra o morto-vivo
-        vantagens: ["Mago Daniel", "Bardo"]           // ganha no duelo de magia
+        vantagens: ["Mago", "Bardo"]           // ganha no duelo de magia
     },
     "Minotauro": {
+        categoria: "Elite", recompensa: 1.2,
         imagem: "Imagens/minotauro.jpg",
         ataqueBasico: "fisico",
         estatisticas: { hp: 180, mp: 20, fisico: 18, defesa: 15, defesaMagica: 8, resVeneno: 10, resSagrado: 8, critico: 8, esquiva: 5 },
-        fraquezas: ["Mago Daniel", "Druida Vianey"],  // pouca defesa mágica
+        fraquezas: ["Mago", "Druida"],  // pouca defesa mágica
         vantagens: ["Guerreiro", "Bárbaro"]           // ninguém aguenta a investida de frente
     },
     "Quimera": {
+        categoria: "Elite", recompensa: 1.2,
         imagem: "Imagens/quimera.png",
         ataqueBasico: "fisico",
         estatisticas: { hp: 140, mp: 30, fisico: 17, veneno: 9, defesa: 10, defesaMagica: 10, resVeneno: 15, resSagrado: 8, critico: 10, esquiva: 8 },
         fraquezas: ["Ladino", "Bardo"],               // ataque pelas costas; música confunde as três cabeças
-        vantagens: ["Arqueira Diovana", "Druida Vianey"]
+        vantagens: ["Arqueira", "Druida"]
     },
     "Basilisco": {
+        categoria: "Elite", recompensa: 1.3,
         imagem: "Imagens/basilisco.jpg",
         ataqueBasico: "veneno",
-        estatisticas: { hp: 160, mp: 25, fisico: 12, veneno: 19, defesa: 12, defesaMagica: 12, resVeneno: 20, resSagrado: 5, critico: 10, esquiva: 8 },
-        fraquezas: ["Druida Vianey", "Ladino"],       // druida resiste a veneno; ladino ataca sem olhar nos olhos
+        estatisticas: { hp: 160, mp: 25, fisico: 12, veneno: 18, defesa: 12, defesaMagica: 12, resVeneno: 20, resSagrado: 5, critico: 10, esquiva: 8 },
+        fraquezas: ["Druida", "Ladino"],       // druida resiste a veneno; ladino ataca sem olhar nos olhos
         vantagens: ["Paladino", "Bardo"]              // o olhar petrifica quem luta de frente
     },
     "Mantícora": {
+        categoria: "Elite", recompensa: 1.1,
         imagem: "Imagens/manticora.png",
         ataqueBasico: "fisico",
         estatisticas: { hp: 150, mp: 20, fisico: 16, veneno: 12, defesa: 10, defesaMagica: 8, resVeneno: 12, resSagrado: 5, critico: 12, esquiva: 10 },
-        fraquezas: ["Arqueira Diovana", "Bardo"],     // flechas pegam em pleno voo
+        fraquezas: ["Arqueira", "Bardo"],     // flechas pegam em pleno voo
         vantagens: ["Ladino", "Paladino"]             // ataca de cima, onde a lâmina não alcança
     },
     "Hidra": {
+        categoria: "Chefe", recompensa: 1.3,
         imagem: "Imagens/hidra.png",
         ataqueBasico: "veneno",
         estatisticas: { hp: 180, mp: 30, fisico: 14, veneno: 14, defesa: 12, defesaMagica: 10, resVeneno: 20, resSagrado: 8, critico: 5, esquiva: 5 },
-        fraquezas: ["Mago Daniel", "Guerreiro"],      // fogo cauteriza; espada corta as cabeças
-        vantagens: ["Arqueira Diovana", "Ladino"]     // flechas e adagas não dão conta de tantas cabeças
+        fraquezas: ["Mago", "Guerreiro"],      // fogo cauteriza; espada corta as cabeças
+        vantagens: ["Arqueira", "Ladino"]     // flechas e adagas não dão conta de tantas cabeças
     },
     "Gárgula": {
+        categoria: "Elite", recompensa: 1.2,
         imagem: "Imagens/gargula.jpg",
         ataqueBasico: "fisico",
         estatisticas: { hp: 170, mp: 25, fisico: 20, defesa: 12, defesaMagica: 12, resVeneno: 8, resSagrado: 12, critico: 8, esquiva: 8 },
         fraquezas: ["Bardo", "Bárbaro"],              // som racha a pedra; marretada também
-        vantagens: ["Mago Daniel", "Arqueira Diovana"] // pele de pedra rebate flechas e feitiços
+        vantagens: ["Mago", "Arqueira"] // pele de pedra rebate flechas e feitiços
     }
 };

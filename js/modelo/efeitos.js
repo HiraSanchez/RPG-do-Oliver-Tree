@@ -8,6 +8,7 @@
 // =====================================================================
 
 class Efeito {
+    #restante;
     constructor(id, nome, duracao, tipo) {
         if (new.target === Efeito) {
             throw new Error("Efeito é uma classe abstrata. Use uma das subclasses.");
@@ -15,10 +16,15 @@ class Efeito {
         this.id = id;
         this.nome = nome;
         this.duracao = duracao;   // em turnos de quem está com o efeito
-        this.restante = duracao;
+        this.#restante = duracao;
+        this.relogio = "turno";
         this.tipo = tipo;         // só para a cor na tela: dano, cura, mana, buff, debuff, atordoar
         this.resistidoPor = null; // estatística que pode bloquear o efeito (ex.: "resVeneno")
     }
+
+    get restante() { return this.#restante; }
+
+    passarTurno() { this.#restante = Math.max(0, this.#restante - 1); }
 
     // Chamado no começo de cada turno de quem está com o efeito
     aoIniciarTurno(alvo, batalha) {
@@ -138,8 +144,8 @@ class EfeitoDeAtributo extends Efeito {
     // bonusFixos: { critico: 25 }   percentuais: { defesa: 50 }
     constructor(id, nome, duracao, tipo, bonusFixos, percentuais) {
         super(id, nome, duracao, tipo);
-        this.bonusFixos = bonusFixos;
-        this.percentuais = percentuais;
+        this.bonusFixos = Object.freeze({ ...bonusFixos });
+        this.percentuais = Object.freeze({ ...percentuais });
     }
 
     bonus(estatistica) {
@@ -178,7 +184,9 @@ class FormaDePedra extends EfeitoDeAtributo {
 
 class Petrificado extends EfeitoDeAtributo {
     constructor() {
-        super("petrificado", "Petrificado", 3, "debuff", {}, { defesa: -30, esquiva: -50 });
+        super("petrificado", "Petrificado", 3, "debuff", {}, { resVeneno: -30, esquiva: -50 });
+        // Três rodadas completas após a aplicação, incluindo a resposta inimiga.
+        this.relogio = "rodada";
     }
 }
 
@@ -200,7 +208,7 @@ class Atordoado extends Efeito {
     }
 }
 
-// Ação "Defender": o próximo dano recebido cai pela metade
+// Todos os golpes diretos até o início da próxima ação; não reduz dano periódico.
 class Defendendo extends Efeito {
     constructor() {
         super("defendendo", "Defendendo", 1, "buff");

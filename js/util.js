@@ -13,6 +13,14 @@ function limitar(valor, minimo, maximo) {
     return valor;
 }
 
+// Os métodos do modelo rejeitam entradas inválidas antes de alterar o estado.
+function numeroNaoNegativo(valor, nome = "Valor") {
+    if (!Number.isFinite(valor) || valor < 0) {
+        throw new RangeError(nome + " deve ser um número finito não negativo.");
+    }
+    return valor;
+}
+
 // Troca os caracteres especiais do HTML.
 // Todo texto digitado pelo usuário passa por aqui antes de ir para o innerHTML,
 // senão alguém poderia colocar código no nome do herói.
@@ -70,8 +78,9 @@ const armazenamento = {
     salvar: function (chave, valor) {
         try {
             localStorage.setItem(chave, JSON.stringify(valor));
+            return true;
         } catch (erro) {
-            // sem como salvar: ignora
+            return false;
         }
     }
 };

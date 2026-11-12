@@ -42,7 +42,7 @@ class CriadorPersonagem extends HTMLElement {
             camposAtributo += `
                 <div class="atributo">
                     <label for="atributo-${a.id}">${a.nome}</label>
-                    <small>${a.descricao}</small>
+                    <small data-ganhos="${a.id}">${a.descricao}</small>
                     <div class="contador">
                         <button type="button" class="botao-contador" data-atributo="${a.id}" data-passo="-1" aria-label="Diminuir ${a.nome}">−</button>
                         <input type="number" id="atributo-${a.id}" name="${a.id}" min="0" max="${REGRAS.maxPorAtributo}" value="0" inputmode="numeric">
@@ -159,12 +159,14 @@ class CriadorPersonagem extends HTMLElement {
 
     // Distribui os pontos um por um, em atributos que ainda não chegaram no máximo
     distribuirAleatorio() {
+        const classe = this.form.elements.classe.value;
+        const uteis = classe ? Heroi.atributosUteis(classe) : ATRIBUTOS;
         const valores = {};
         for (const a of ATRIBUTOS) {
             valores[a.id] = 0;
         }
         for (let i = 0; i < REGRAS.pontosAtributo; i++) {
-            const livres = ATRIBUTOS.filter(function (a) {
+            const livres = uteis.filter(function (a) {
                 return valores[a.id] < REGRAS.maxPorAtributo;
             });
             const escolhido = this.sorteio.item(livres);
@@ -196,12 +198,18 @@ class CriadorPersonagem extends HTMLElement {
         }
 
         const classe = this.form.elements.classe.value;
+        for (const atributo of ATRIBUTOS) {
+            const ganhos = classe ? Heroi.ganhosDoAtributo(classe, atributo.id) : [];
+            this.querySelector('[data-ganhos="' + atributo.id + '"]').textContent = !classe ? atributo.descricao :
+                ganhos.length === 0 ? "Sem efeito nesta classe" :
+                ganhos.map(g => "+" + g.ganho + " " + ESTATISTICAS[g.stat]).join(" · ") + " por ponto (nível 1)";
+        }
         const botaoRecomendado = this.querySelector("[data-recomendado]");
         botaoRecomendado.disabled = classe === "";
         if (classe === "") {
             botaoRecomendado.title = "Escolha uma classe primeiro";
         } else {
-            botaoRecomendado.title = "Distribui os pontos do jeito ideal para " + classe;
+            botaoRecomendado.title = "Distribuição sugerida para " + classe;
         }
 
         let descricao = "";
@@ -250,8 +258,12 @@ class CriadorPersonagem extends HTMLElement {
             }
         }
 
-        this.personagem = criarHeroi(nome, classe, atributos);
-        this.salvar();
+        const novoPersonagem = criarHeroi(nome, classe, atributos);
+        if (!armazenamento.salvar(CHAVE_HEROI_SALVO, novoPersonagem.paraSalvar())) {
+            this.mostrarErro("Não foi possível salvar. Permita o armazenamento do navegador e tente novamente.");
+            return;
+        }
+        this.personagem = novoPersonagem;
         this.mostrarFicha(this.personagem, "Herói criado", this.linkProximoPasso());
     }
 

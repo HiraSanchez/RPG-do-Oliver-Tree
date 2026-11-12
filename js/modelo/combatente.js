@@ -12,11 +12,15 @@ class Combatente {
     #mp;
     #efeitos;
     #recarga; // turnos até a habilidade poder ser usada de novo
+    #efeitosDaRodada = [];
 
     constructor(nome, imagem, nivel, estatisticas, ataqueBasico) {
         // Não faz sentido existir um "Combatente" genérico, só Heróis e Monstros
         if (new.target === Combatente) {
             throw new Error("Combatente é uma classe abstrata. Crie um Heroi ou um Monstro.");
+        }
+        if (!Number.isInteger(nivel) || nivel < 1 || nivel > REGRAS.nivelMaximo + 2) {
+            throw new RangeError("Nível inválido.");
         }
         this.nome = nome;
         this.imagem = imagem;
@@ -31,18 +35,16 @@ class Combatente {
 
     // Guarda as estatísticas, colocando 0 nas que não foram informadas
     definirEstatisticas(estatisticas) {
-        this.#base = {};
+        const base = {};
         for (const nome in ESTATISTICAS) {
-            if (estatisticas[nome] === undefined) {
-                this.#base[nome] = 0;
-            } else {
-                this.#base[nome] = estatisticas[nome];
-            }
+            base[nome] = numeroNaoNegativo(estatisticas[nome] ?? 0, nome);
         }
+        this.#base = base;
         // se o HP máximo diminuir, o HP atual acompanha
         if (this.#hp > this.#base.hp) {
             this.#hp = this.#base.hp;
         }
+        if (this.#mp > this.#base.mp) this.#mp = this.#base.mp;
     }
 
     // ---------- HP e MP ----------
@@ -69,25 +71,25 @@ class Combatente {
 
     // Os métodos abaixo devolvem quanto realmente mudou (usado no log)
     receberDano(valor) {
-        const dano = Math.min(this.#hp, Math.round(valor));
+        const dano = Math.min(this.#hp, Math.round(numeroNaoNegativo(valor)));
         this.#hp = this.#hp - dano;
         return dano;
     }
 
     curar(valor) {
-        const cura = Math.min(this.getHpMaximo() - this.#hp, Math.round(valor));
+        const cura = Math.min(this.getHpMaximo() - this.#hp, Math.round(numeroNaoNegativo(valor)));
         this.#hp = this.#hp + cura;
         return cura;
     }
 
     recuperarMp(valor) {
-        const recuperado = Math.min(this.getMpMaximo() - this.#mp, Math.round(valor));
+        const recuperado = Math.min(this.getMpMaximo() - this.#mp, Math.round(numeroNaoNegativo(valor)));
         this.#mp = this.#mp + recuperado;
         return recuperado;
     }
 
     gastarMp(valor) {
-        const gasto = Math.min(this.#mp, Math.round(valor));
+        const gasto = Math.min(this.#mp, Math.round(numeroNaoNegativo(valor)));
         this.#mp = this.#mp - gasto;
         return gasto;
     }
@@ -98,6 +100,7 @@ class Combatente {
         this.#mp = this.getMpMaximo();
         this.#efeitos = [];
         this.#recarga = 0;
+        this.#efeitosDaRodada = [];
     }
 
     // ---------- Estatísticas ----------
@@ -119,14 +122,53 @@ class Combatente {
             valor = valor + efeito.bonus(nome);
             percentual = percentual + efeito.bonusPercentual(nome);
         }
-        return Math.max(0, valor * (1 + percentual / 100));
+        return limitar(valor * (1 + percentual / 100), 0, limiteEstatistica(nome));
     }
 
     // ---------- Efeitos ----------
 
-    // Devolve uma cópia da lista, para ninguém mexer nela por fora
+    // A interface recebe somente descrições imutáveis, nunca os efeitos internos.
     getEfeitos() {
-        return this.#efeitos.slice();
+        return Object.freeze(this.#efeitos.map(efeito => Object.freeze({
+            id: efeito.id, nome: efeito.nome, tipo: efeito.tipo, restante: efeito.restante
+        })));
+    }
+
+    multiplicadorDanoRecebido() {
+        return this.#efeitos.reduce((valor, efeito) => valor * efeito.multiplicadorDanoRecebido(), 1);
+    }
+
+    iniciarRodada() {
+        this.#efeitosDaRodada = this.#efeitos.slice();
+    }
+
+    finalizarRodada(batalha) {
+        for (const efeito of this.#efeitosDaRodada) {
+            if (efeito.relogio === "rodada" && this.#efeitos.includes(efeito)) {
+                this.consumirDuracao(efeito, batalha);
+            }
+        }
+        this.#efeitosDaRodada = [];
+    }
+
+    processarEfeitos(batalha) {
+        let podeAgir = this.estaVivo();
+        for (const efeito of this.#efeitos.slice()) {
+            if (!this.estaVivo()) return false;
+            if (efeito.impedeAcao()) podeAgir = false;
+            efeito.aoIniciarTurno(this, batalha);
+            if (efeito.relogio === "turno") this.consumirDuracao(efeito, batalha);
+        }
+        if (!podeAgir && this.estaVivo()) batalha.narrar("atordoado", { ator: this });
+        return podeAgir && this.estaVivo();
+    }
+
+    consumirDuracao(efeito, batalha) {
+        efeito.passarTurno();
+        if (efeito.restante === 0) {
+            this.removerEfeito(efeito.id);
+            if (efeito.avisaQuandoTermina()) batalha.narrar("fim-efeito", { alvo: this, efeito });
+        }
     }
 
     temEfeito(id) {
@@ -140,8 +182,9 @@ class Combatente {
 
     // Se o efeito já está ativo, só renova a duração (não acumula)
     adicionarEfeito(novoEfeito) {
+        if (!(novoEfeito instanceof Efeito)) throw new TypeError("Efeito inválido.");
         this.removerEfeito(novoEfeito.id);
-        this.#efeitos.push(novoEfeito);
+        this.#efeitos.push(Object.freeze(novoEfeito));
     }
 
     removerEfeito(id) {
@@ -226,5 +269,7 @@ class Combatente {
 // JavaScript não tem interface, então verificamos se o objeto tem o método.
 // Assim um combatente sem habilidade não é obrigado a ter um método vazio (ISP).
 function temHabilidadeEspecial(combatente) {
-    return typeof combatente.usarHabilidade === "function";
+    const h = combatente.habilidade;
+    return typeof combatente.usarHabilidade === "function" && h != null &&
+        Number.isFinite(h.custo) && h.custo >= 0 && Number.isInteger(h.recarga) && h.recarga >= 1;
 }

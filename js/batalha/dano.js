@@ -35,9 +35,7 @@ class CalculadoraDeDano {
         }
 
         // Efeitos do defensor, como "Defendendo" (metade do dano)
-        for (const efeito of defensor.getEfeitos()) {
-            dano = dano * efeito.multiplicadorDanoRecebido();
-        }
+        dano = dano * defensor.multiplicadorDanoRecebido();
 
         // Cada golpe varia um pouco (10% para mais ou para menos)
         const variacao = (this.sorteio.numero() * 2 - 1) * REGRAS.variacaoDano;

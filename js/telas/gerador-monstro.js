@@ -49,6 +49,7 @@ class GeradorMonstro extends HTMLElement {
                     </select>
                 </div>
                 <button type="button" data-gerar>Gerar Monstro</button>
+                <p data-erro role="alert"></p>
             </div>
             <div class="output" data-saida hidden></div>`;
 
@@ -72,8 +73,13 @@ class GeradorMonstro extends HTMLElement {
             nivel = this.sorteio.inteiro(nivelHeroi, nivelHeroi + 1);
         }
 
-        this.monstro = criarMonstro(tipo, nivel);
-        armazenamento.salvar(CHAVE_MONSTRO_SALVO, this.monstro.paraSalvar());
+        const novoMonstro = criarMonstro(tipo, nivel);
+        if (!armazenamento.salvar(CHAVE_MONSTRO_SALVO, novoMonstro.paraSalvar())) {
+            this.querySelector('[data-erro]').textContent = "Não foi possível salvar o monstro. Permita o armazenamento do navegador.";
+            return;
+        }
+        this.querySelector('[data-erro]').textContent = "";
+        this.monstro = novoMonstro;
         this.mostrarFicha("Monstro gerado");
     }
 
