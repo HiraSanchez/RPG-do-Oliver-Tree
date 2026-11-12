@@ -254,9 +254,9 @@ class Mago extends Heroi {
     constructor(nome, atributos, nivel, xp) {
         super(nome, "Mago", atributos, nivel, xp);
         this.habilidade = {
-            nome: "Ataque Banco Master",
+            nome: "Ataque Kuromi",
             descricao: "Dano mágico de 200% e deixa o alvo queimando por 2 turnos.",
-            mensagem: "invoca o Daniel Vorcaro e lança uma bola de fogo que tira toda sua aposentadoria",
+            mensagem: "Dispara uma rajada explosiva do Caos, queimando seus inimigos com um fogo infernal",
             custo: 25,
             recarga: 2
         };
@@ -316,7 +316,7 @@ class Bardo extends Heroi {
         this.habilidade = {
             nome: "Canção de Batalha",
             descricao: "Dano mágico de 140%; recupera 10% do MP máximo no início das próximas 3 ações e ganha +10 pontos percentuais de crítico por 3 ações, incluindo esta.",
-            mensagem: "entoa uma melodia mágica que ressoa no ar",
+            mensagem: "entoa uma melodia mágica que ressoa no ar (Canção Picada Fatal MC Livinho)",
             custo: 20,
             recarga: 3
         };
@@ -334,7 +334,7 @@ class Ladino extends Heroi {
         this.habilidade = {
             nome: "Golpe Furtivo",
             descricao: "Dano físico de 150% com +30 pontos percentuais de chance de crítico neste golpe; envenena o alvo.",
-            mensagem: "se move com velocidade sobrenatural e ataca pelas sombras",
+            mensagem: "Cria uma ilusão que hipnotiza, se move com velocidade sobrenatural e ataca pelas sombras",
             custo: 15,
             recarga: 2
         };
@@ -352,9 +352,9 @@ class Druida extends Heroi {
     constructor(nome, atributos, nivel, xp) {
         super(nome, "Druida", atributos, nivel, xp);
         this.habilidade = {
-            nome: "Chamado da Oracle",
+            nome: "Chamado da MY MELODY",
             descricao: "Dano mágico de 150%, envenena o alvo em um loop for e regenera 8% do HP por 3 turnos.",
-            mensagem: "invoca as forças primais da natureza, abençoadas pela Oracle",
+            mensagem: "invoca as forças primais da natureza, abençoadas pela My Melody",
             custo: 25,
             recarga: 3
         };
