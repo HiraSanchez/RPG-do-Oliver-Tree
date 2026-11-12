@@ -120,7 +120,7 @@ const DADOS_HEROIS = {
         }
     },
     "Mago": {
-        imagem: "Imagens/ladino.png",
+        imagem: "Imagens/mago2.png",
         descricao: "Nyh, a amiga mais bela que o criador do RPG fez recentemente, suas habilidades mágicas são tão excepcionais quanto sua beleza",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
@@ -195,7 +195,7 @@ const DADOS_HEROIS = {
     },
     "Ladino": {
         imagem: "Imagens/Eterno_Amor.png",
-        descricao: "Lorena, princesa amada pelo coração do criador deste RPG. Infelizmente, acabei perdendo-a por falhas minhas, mas decidi eternizá-la neste jogo para nunca me esquecer do quanto ela foi especial para mim.",
+        descricao: "Lorena, Rainha amada pelo coração do criador deste RPG até o fim dos tempos. Infelizmente, o criador acabou perdendo-a por causa de uma depressão infernal que piora a cada ano, mas ele decidiu eternizá-la neste jogo para nunca esquecer do quanto ela foi especial.",
         ataqueBasico: "fisico",
         danosUsados: ["fisico", "veneno"],
         formulas: {
