@@ -121,7 +121,7 @@ const DADOS_HEROIS = {
     },
     "Mago": {
         imagem: "Imagens/mago.png",
-        descricao: "Nyh, uma amiga divertida e admirável que o criador do RPG fez. Sua aura e seus poderes mágicos são tão excepcionais quanto sua beleza.",
+        descricao: "Filho de Daniel Vorcaro, seus poderes mágicos são extraordinários",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
         formulas: {
@@ -195,7 +195,7 @@ const DADOS_HEROIS = {
     },
     "Ladino": {
         imagem: "Imagens/ladino.png",
-        descricao: "Lorena, Rainha amada pelo coração do criador deste RPG até o fim dos tempos. Infelizmente, acabei perdendo-a por falhas minhas, mas decidi eternizá-la neste jogo para nunca me esquecer do quanto ela foi e é especial para mim.",
+        descricao: "Nyh, uma amiga divertida e admirável que o criador do RPG fez. Suas habilidades são tão excepcionais quanto sua beleza.",
         ataqueBasico: "fisico",
         danosUsados: ["fisico", "veneno"],
         formulas: {
