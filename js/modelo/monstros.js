@@ -170,7 +170,7 @@ class Lich extends Monstro {
         this.habilidade = {
             nome: "Raio da Morte",
             descricao: "Dano espiritual (energia profana) de 180% e drena 10% do MP máximo do alvo.",
-            mensagem: "invoca um raio da morte que corta o ar",
+            mensagem: "invoca um uma coceira mortal no pé, que quebra totalmente sua sanidade",
             custo: 20,
             recarga: 2
         };
