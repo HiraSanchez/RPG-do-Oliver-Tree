@@ -121,7 +121,7 @@ const DADOS_HEROIS = {
     },
     "Mago": {
         imagem: "Imagens/mago.png",
-        descricao: "Nyh,a amiga mais bela que o criador do RPG fez. Sua aura e seus poderes são tão excepcionais quanto sua beleza.",
+        descricao: "Nyh, a amiga mais bela que o criador do RPG fez. Sua aura e seus poderes mágicos são tão excepcionais quanto sua beleza.",
         ataqueBasico: "magico",
         danosUsados: ["magico"],
         formulas: {
@@ -139,7 +139,7 @@ const DADOS_HEROIS = {
     },
     "Arqueira": {
         imagem: "Imagens/dih.png",
-        descricao: "Ágil e precisa: muito crítico e esquiva.",
+        descricao: "Linda, maravilhosa, ágil e precisa: muito crítico e esquiva.",
         ataqueBasico: "fisico",
         danosUsados: ["fisico", "veneno"],
         formulas: {
@@ -213,7 +213,7 @@ const DADOS_HEROIS = {
     },
     "Druida": {
         imagem: "Imagens/druida.png",
-        descricao: "Manu, pequena e simpática, apaixonada pela natureza e amiga do criador deste RPG.",
+        descricao: "Manu, pequena e simpática, protetora da natureza e amiga do criador deste RPG.",
         ataqueBasico: "magico",
         danosUsados: ["magico", "veneno"],
         formulas: {
