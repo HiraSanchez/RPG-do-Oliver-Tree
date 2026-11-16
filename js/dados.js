@@ -195,7 +195,8 @@ const DADOS_HEROIS = {
     },
     "Ladino": {
         imagem: "Imagens/Eterno_Amor.png",
-        descricao: "Lorena, Rainha amada pelo coração do criador deste RPG até o fim dos tempos. Infelizmente, o criador acabou perdendo-a por causa de uma depressão infernal que piora a cada ano, mas ele decidiu eternizá-la neste jogo para nunca esquecer do quanto ela foi especial.",
+        descricao:
+"[ENTITY_???]—QSBTYXVkYWRlIMOpIHVtYSBNYWxkacOnw6Nv, Rainha amada pelo coração do criador deste RPG até o fim dos tempos. Infelizmente, o criador acabou perdendo-a por causa de uma depressão infernal que piora a cada ano, mas ele decidiu eternizá-la neste jogo para nunca esquecer do quanto ela foi especial.",
         ataqueBasico: "fisico",
         danosUsados: ["fisico", "veneno"],
         formulas: {
