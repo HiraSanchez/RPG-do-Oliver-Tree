@@ -118,6 +118,7 @@
     min-height: 1.5em;
     margin-top: 6px;
     white-space: pre-line;
+    overflow-wrap: anywhere; 
 }
 
 .pontos-total {
