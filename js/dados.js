@@ -196,7 +196,7 @@ const DADOS_HEROIS = {
     "Ladino": {
         imagem: "Imagens/Eterno_Amor.png",
         descricao:
-"[ENTITY_???]—QSBTYXVkYWRlIMOpIHVtYSBNYWxkacOnw6Nv, Outrora, foi a Rainha mais amada pelo próprio Criador deste jogo. Ele a amou com tamanha intensidade que, em seu último ato de devoção, sacrificou os próprios sentimentos para permitir que ela seguisse seu caminho e encontrasse a felicidade, mesmo que longe dele.
+"[ENTITY_???]—QSBTYXVkYWRlIMOpIHVtYSBNYWxkacOnw6Nv, outrora, foi a Rainha mais amada pelo próprio Criador deste jogo. Ele a amou com tamanha intensidade que, em seu último ato de devoção, sacrificou os próprios sentimentos para permitir que ela seguisse seu caminho e encontrasse a felicidade, mesmo que longe dele.
 Entretanto, seu sacrifício não foi compreendido. Em vez de gratidão, recebeu desprezo. A Rainha transformou o amor em ódio, julgou a dor daquele que a amava e, diante de seu sofrimento, condenou-o como covarde.
 A Ladina Sorrateira,capaz de roubar até o coração do criador, conquista silenciosamente e desaparece como poeira ao vento, deixando apenas cicatrizes e saudade.",
         ataqueBasico: "fisico",
